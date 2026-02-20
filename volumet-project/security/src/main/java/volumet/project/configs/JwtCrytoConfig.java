@@ -1,6 +1,7 @@
 package volumet.project.configs;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -24,12 +25,14 @@ import static volumet.project.constants.EncodingAlgorithm.HMAC_SHA_256;
 public class JwtCrytoConfig {
 
     @Bean
+    @ConditionalOnMissingBean
     SecretKey secretKey(SecurityKeyProperties securityKeyProperties) {
         byte[] secretKeyBytes = Base64.getUrlDecoder().decode(securityKeyProperties.secretKey().getBytes());
         return new SecretKeySpec(secretKeyBytes, HMAC_SHA_256);
     }
 
     @Bean
+    @ConditionalOnMissingBean
     JwtDecoder jwtDecoder(SecretKey secretKey) {
         return NimbusJwtDecoder
                 .withSecretKey(secretKey)

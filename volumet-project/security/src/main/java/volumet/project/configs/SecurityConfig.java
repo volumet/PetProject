@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -21,11 +20,8 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import volumet.project.annotations.DevProfile;
-import volumet.project.annotations.KeyCloakProfile;
 import volumet.project.annotations.ProdProfile;
 import volumet.project.annotations.SecurityAutoConfiguration;
-import volumet.project.components.DomainIdentifierResolver;
-import volumet.project.converters.KeycloakJwtAuthenticationConverter;
 import volumet.project.utils.PermissionUtils;
 
 import java.io.IOException;
@@ -51,9 +47,10 @@ public class SecurityConfig {
     @Bean
     @ProdProfile
     public SecurityFilterChain securedFilterChain(HttpSecurity http,
+                                                  Converter<Jwt, AbstractAuthenticationToken> converter,
                                                   AuthenticationEntryPoint authEntryPoint,
                                                   AccessDeniedHandler accessDeniedHandler) throws Exception {
-        initCommonSecurityChain(http, authEntryPoint, accessDeniedHandler);
+        initCommonSecurityChain(http, converter, authEntryPoint, accessDeniedHandler);
         http.authorizeHttpRequests(auth -> auth.anyRequest().authenticated());
 
         return http.build();
@@ -67,11 +64,12 @@ public class SecurityConfig {
     @Bean
     @DevProfile
     public SecurityFilterChain limitedSecurityFilterChain(HttpSecurity http,
+                                                          Converter<Jwt, AbstractAuthenticationToken> converter,
                                                           AuthenticationEntryPoint authEntryPoint,
                                                           AccessDeniedHandler accessDeniedHandler) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
 
-        initCommonSecurityChain(http, authEntryPoint, accessDeniedHandler);
+        initCommonSecurityChain(http, converter, authEntryPoint, accessDeniedHandler);
 
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(
@@ -86,11 +84,12 @@ public class SecurityConfig {
     }
 
     private void initCommonSecurityChain(HttpSecurity http,
+                                         Converter<Jwt, AbstractAuthenticationToken> converter,
                                          AuthenticationEntryPoint authEntryPoint,
                                          AccessDeniedHandler accessDeniedHandler) throws Exception {
         http
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()))
+                .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(converter)))
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler));
@@ -130,12 +129,4 @@ public class SecurityConfig {
                 .addSecurityItem(new SecurityRequirement().addList(BEARER_AUTH));
     }
 
-    /**
-     * Returning a concrete class to avoid clashing with SpringMvc internal mechanism
-     */
-    @Bean
-    @KeyCloakProfile
-    Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter(DomainIdentifierResolver domainIdentifierResolver) {
-        return new KeycloakJwtAuthenticationConverter(domainIdentifierResolver);
-    }
 }
