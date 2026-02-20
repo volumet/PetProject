@@ -32,7 +32,7 @@ springdoc:
 app:
   security:
     jwt:
-      secret-key: ${DEV_JWT_SECRET_KEY}
+      issuer-uri: http://localhost:${KEYCLOAK_WSL2_PORT}/realms/volumet-realm
     enabled: true
   correlation:
     enabled: true

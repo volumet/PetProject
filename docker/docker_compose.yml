@@ -1,36 +1,102 @@
-version: '3.9'
-
 services:
- sqlserver:
-   image: mcr.microsoft.com/mssql/server:2022-CU13-ubuntu-22.04
-   container_name: sql2022
-   ports:
-    - "1433:1433"
-   environment:
-    ACCEPT_EULA: "Y"
-    SA_PASSWORD: "${DB_PASSWORD}"
-   volumes:
-    - sql_data:/var/opt/mssql
-   networks:
-    volumetnet:
-     aliases:
-      - sql2022
-      
- redis:
-  image: redis:7
-  container_name: redis
-  ports:
-   - "6379:6379"
-  volumes: 
-   - redis_data:/var/opt/redis
-   - ./redis.conf:/usr/local/etc/redis/redis.conf
-  command: redis-server /usr/local/etc/redis/redis.conf
-  restart: unless-stopped
-    
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:${MSSQL_IMAGE_VERSION}
+    container_name: sql2022
+    restart: unless-stopped
+    ports:
+      - "${DB_WSL2_PORT}:${DB_PORT}"
+    env_file:
+      - .env
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "${DB_PASSWORD}"
+    volumes:
+      - sql_data:/var/opt/mssql
+      - ./docker-entrypoint-initdb.d:/init
+    command: /bin/bash /init/init.sh
+    networks:
+      volumetnet:
+        aliases:
+          - sql2022
+
+  redis:
+    image: redis:${REDIS_VERSION}
+    container_name: redis
+    ports:
+      - "${REDIS_WSL2_PORT}:${REDIS_PORT}"
+    volumes:
+      - redis_data:/var/opt/redis
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    networks:
+      volumetnet:
+
+  postgresql:
+    image: postgres:${POSTGRE_KEYCLOAK_DB_VERSION}
+    container_name: keycloak-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: "${POSTGRE_KEYCLOAK_DATABASE}"
+      POSTGRES_USER: "${POSTGRE_KEYCLOAK_USER}"
+      POSTGRES_PASSWORD: "${POSTGRE_KEYCLOAK_PASSWORD}"
+    volumes:
+      - keycloak_db_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRE_KEYCLOAK_WSL2_PORT}:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      volumetnet:
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
+    container_name: keycloak
+    ports:
+      - "${KEYCLOAK_WSL2_PORT}:8080"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      KC_HTTP_ENABLED: true
+      KC_BOOTSTRAP_ADMIN_USERNAME: "${KEYCLOAK_ADMIN_USER}"
+      KC_BOOTSTRAP_ADMIN_PASSWORD: "${KEYCLOAK_ADMIN_PASSWORD}"
+      KC_HOSTNAME: localhost
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgresql
+      KC_DB_URL_PORT: 5432
+      KC_DB_URL_DATABASE: "${POSTGRE_KEYCLOAK_DATABASE}"
+      KC_DB_USERNAME: "${POSTGRE_KEYCLOAK_USER}"
+      KC_DB_PASSWORD: "${POSTGRE_KEYCLOAK_PASSWORD}"
+      KC_HEALTH_ENABLED: "true"
+      KC_PROXY: edge
+    restart: unless-stopped
+    command: ["start"]
+    networks:
+      volumetnet:
+
+  keycloak-init:
+    image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
+    restart: "no"
+    environment:
+      KEYCLOAK_BASE_URL: "${KEYCLOAK_WSL2_BASE_URL}:8080" # This should target keycloak server itself
+      CLIENT_SECRET: "${KEYCLOAK_CLIENT_SECRET}"
+      KC_BOOTSTRAP_ADMIN_USERNAME: "${KEYCLOAK_ADMIN_USER}"
+      KC_BOOTSTRAP_ADMIN_PASSWORD: "${KEYCLOAK_ADMIN_PASSWORD}"
+    volumes:
+      - ./keycloak-init/:/init
+    entrypoint: ["/bin/bash", "/init/init.sh"]
+    networks:
+      volumetnet:
+
 volumes:
- sql_data:
- redis_data:
- 
+  sql_data:
+  redis_data:
+  keycloak_db_data:
+
 networks:
- volumetnet:
-  external: true
+  volumetnet:
+    external: true

@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.jwt.Jwt;
-import volumet.project.annotations.KeyCloakProfile;
+import volumet.project.annotations.KeycloakProfile;
 import volumet.project.components.DomainIdentifierResolver;
 import volumet.project.converters.KeycloakJwtAuthenticationConverter;
 
@@ -16,7 +16,7 @@ public class AuthenticationConfig {
      * Returning a concrete class to avoid clashing with SpringMvc internal mechanism
      */
     @Bean
-    @KeyCloakProfile
+    @KeycloakProfile
     @ConditionalOnMissingBean(Converter.class)
     Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter(DomainIdentifierResolver domainIdentifierResolver) {
         return new KeycloakJwtAuthenticationConverter(domainIdentifierResolver);
