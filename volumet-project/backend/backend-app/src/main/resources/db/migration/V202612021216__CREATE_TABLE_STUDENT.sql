@@ -1,0 +1,38 @@
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.objects
+    WHERE object_id = OBJECT_ID(N'school.STUDENT')
+)
+BEGIN
+    CREATE TABLE school.STUDENT (
+        ID BIGINT PRIMARY KEY,
+        STUDENT_CODE NVARCHAR(50) NOT NULL,
+        PERSON_ID BIGINT NOT NULL,
+        STATUS NVARCHAR(6) NOT NULL,
+        ENROLLMENT_DATE DATE NOT NULL,
+
+        -- Auditable
+        USR_LOG_I NVARCHAR(100) NOT NULL,
+        DTE_LOG_I DATETIME2 NOT NULL,
+        USR_LOG_U NVARCHAR(100) NULL,
+        DTE_LOG_U DATETIME2 NULL,
+        VERSION BIGINT NOT NULL,
+
+        -- Constraints
+        CONSTRAINT FK_STUDENT_PERSON FOREIGN KEY (PERSON_ID) REFERENCES school.PERSON(ID)
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.sequences
+    WHERE name = 'STUDENT_SEQUENCE'
+      AND SCHEMA_NAME(schema_id) = 'school'
+)
+BEGIN
+    CREATE SEQUENCE school.STUDENT_SEQUENCE
+        AS INT
+        START WITH 1
+        INCREMENT BY 50
+        NO CYCLE;
+END;

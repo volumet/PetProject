@@ -1,0 +1,24 @@
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: "20s"
+  jpa:
+    show-sql: false
+  flyway:
+    clean-disabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://keycloak-server/realms/myrealm
+
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+
+app:
+  security:
+    enabled: true
+  correlation:
+    enabled: true

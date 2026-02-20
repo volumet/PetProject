@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+ sqlserver:
+   image: mcr.microsoft.com/mssql/server:2022-CU13-ubuntu-22.04
+   container_name: sql2022
+   ports:
+    - "1433:1433"
+   environment:
+    ACCEPT_EULA: "Y"
+    SA_PASSWORD: "${DB_PASSWORD}"
+   volumes:
+    - sql_data:/var/opt/mssql
+   networks:
+    volumetnet:
+     aliases:
+      - sql2022
+      
+ redis:
+  image: redis:7
+  container_name: redis
+  ports:
+   - "6379:6379"
+  volumes: 
+   - redis_data:/var/opt/redis
+   - ./redis.conf:/usr/local/etc/redis/redis.conf
+  command: redis-server /usr/local/etc/redis/redis.conf
+  restart: unless-stopped
+    
+volumes:
+ sql_data:
+ redis_data:
+ 
+networks:
+ volumetnet:
+  external: true

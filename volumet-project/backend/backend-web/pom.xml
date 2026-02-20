@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>volumet.project</groupId>
+		<artifactId>volumet-backend</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>volumet-backend-web</artifactId>
+	<name>volumet-backend-web</name>
+	<description>Project backend web services</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>volumet.project</groupId>
+			<artifactId>volumet-backend-core</artifactId>
+		</dependency>
+
+		<!-- Support common utility like custom dtos and constants -->
+		<dependency>
+			<groupId>volumet.project</groupId>
+			<artifactId>volumet-common-dtos</artifactId>
+		</dependency>
+
+		<!-- Support logging like correlations -->
+		<dependency>
+			<groupId>volumet.project</groupId>
+			<artifactId>volumet-common-logger</artifactId>
+		</dependency>
+
+		<!-- Swagger support -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+		</dependency>
+
+		<!-- Spring web behavior -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+	</dependencies>
+</project>

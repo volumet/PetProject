@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>volumet.project</groupId>
+        <artifactId>volumet-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>volumet-common</artifactId>
+    <name>volumet-common</name>
+    <description>Project common modules</description>
+
+    <packaging>pom</packaging>
+    <modules>
+        <module>common-utils</module>
+        <module>common-logger</module>
+        <module>common-mappers</module>
+        <module>common-persistence</module>
+        <module>common-security</module>
+        <module>common-dtos</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>volumet.project</groupId>
+                <artifactId>volumet-common-utils</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>volumet.project</groupId>
+                <artifactId>volumet-common-security</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>volumet.project</groupId>
+                <artifactId>volumet-common-logger</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>volumet.project</groupId>
+                <artifactId>volumet-common-dtos</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>
