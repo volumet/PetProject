@@ -1,3 +1,2 @@
 volumet.project.configs.SecurityConfig
 volumet.project.configs.AuthenticationConfig
-volumet.project.configs.JwtCrytoConfig

@@ -26,7 +26,7 @@ services:
       - "${REDIS_WSL2_PORT}:${REDIS_PORT}"
     volumes:
       - redis_data:/var/opt/redis
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - .redis/redis.conf:/usr/local/etc/redis/redis.conf
     command: redis-server /usr/local/etc/redis/redis.conf
     restart: unless-stopped
     networks:
@@ -64,7 +64,6 @@ services:
       KC_HTTP_ENABLED: true
       KC_BOOTSTRAP_ADMIN_USERNAME: "${KEYCLOAK_ADMIN_USER}"
       KC_BOOTSTRAP_ADMIN_PASSWORD: "${KEYCLOAK_ADMIN_PASSWORD}"
-      KC_HOSTNAME: localhost
       KC_DB: postgres
       KC_DB_URL_HOST: postgresql
       KC_DB_URL_PORT: 5432
@@ -72,7 +71,6 @@ services:
       KC_DB_USERNAME: "${POSTGRE_KEYCLOAK_USER}"
       KC_DB_PASSWORD: "${POSTGRE_KEYCLOAK_PASSWORD}"
       KC_HEALTH_ENABLED: "true"
-      KC_PROXY: edge
     restart: unless-stopped
     command: ["start-dev"]
     networks:
@@ -82,10 +80,11 @@ services:
     image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
     restart: "no"
     environment:
-      KEYCLOAK_BASE_URL: http://keycloak:8080 # This should target keycloak server itself
+      KEYCLOAK_BASE_URL: "${KEYCLOAK_WSL2_BASE_URL}:8080" # This should target keycloak server itself
       CLIENT_SECRET: "${KEYCLOAK_CLIENT_SECRET}"
       KC_BOOTSTRAP_ADMIN_USERNAME: "${KEYCLOAK_ADMIN_USER}"
       KC_BOOTSTRAP_ADMIN_PASSWORD: "${KEYCLOAK_ADMIN_PASSWORD}"
+      DIRECT_ACCESS_ENABLED: "true"
     volumes:
       - ./keycloak-init/:/init
     entrypoint: ["/bin/bash", "/init/init.sh"]

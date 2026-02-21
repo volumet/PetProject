@@ -64,7 +64,7 @@ services:
       KC_HTTP_ENABLED: true
       KC_BOOTSTRAP_ADMIN_USERNAME: "${KEYCLOAK_ADMIN_USER}"
       KC_BOOTSTRAP_ADMIN_PASSWORD: "${KEYCLOAK_ADMIN_PASSWORD}"
-      KC_HOSTNAME: localhost
+      KC_HOSTNAME: "${KEYCLOAK_EXTERNAL_BASE_URL}"
       KC_DB: postgres
       KC_DB_URL_HOST: postgresql
       KC_DB_URL_PORT: 5432
@@ -86,6 +86,7 @@ services:
       CLIENT_SECRET: "${KEYCLOAK_CLIENT_SECRET}"
       KC_BOOTSTRAP_ADMIN_USERNAME: "${KEYCLOAK_ADMIN_USER}"
       KC_BOOTSTRAP_ADMIN_PASSWORD: "${KEYCLOAK_ADMIN_PASSWORD}"
+      DIRECT_ACCESS_ENABLED: "false"
     volumes:
       - ./keycloak-init/:/init
     entrypoint: ["/bin/bash", "/init/init.sh"]

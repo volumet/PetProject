@@ -7,6 +7,7 @@ import volumet.project.domains.QExternalIdentifier;
 import volumet.project.domains.QPerson;
 import volumet.project.repositories.query.PersonRepository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -15,15 +16,15 @@ public class PersonRepositoryImpl implements PersonRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public UUID findPersonUuidByExternalIdentifier(String issuer, String subject) {
+    public Optional<UUID> findPersonUuidByExternalIdentifier(String issuer, String subject) {
         QPerson person = QPerson.person;
         QExternalIdentifier externalIdentifier = QExternalIdentifier.externalIdentifier;
 
-        return queryFactory
+        return Optional.ofNullable(queryFactory
                 .select(person.uuid)
                 .from(person)
                 .join(person.externalIdentifiers, externalIdentifier)
                 .where(externalIdentifier.issuer.eq(issuer).and(externalIdentifier.subject.eq(subject)))
-                .fetchFirst();
+                .fetchFirst());
     }
 }

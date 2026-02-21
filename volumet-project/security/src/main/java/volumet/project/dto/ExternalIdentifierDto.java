@@ -14,4 +14,6 @@ import lombok.Setter;
 public class ExternalIdentifierDto {
     private String issuer;
     private String subject;
+    private String firstName;
+    private String lastName;
 }

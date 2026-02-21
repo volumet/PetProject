@@ -8,15 +8,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import volumet.project.components.DomainIdentifierResolver;
-import volumet.project.dto.ExternalIdentifierDto;
-import volumet.project.dtos.AppPrincipal;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static volumet.project.constants.SecurityConstant.REALM_ACCESS;
@@ -25,7 +21,6 @@ import static volumet.project.constants.SecurityConstant.ROLE_PREFIX;
 
 @RequiredArgsConstructor
 public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
-    private final DomainIdentifierResolver domainIdentifierResolver;
 
     @Override
     public AbstractAuthenticationToken convert(@NonNull Jwt jwt) {
@@ -40,14 +35,6 @@ public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, Abstra
                     .collect(Collectors.toSet()));
         }
 
-        UUID identifierUuid = domainIdentifierResolver.resolveIdentifierUuid(new ExternalIdentifierDto(jwt.getIssuer().toString(), jwt.getSubject()));
-        AppPrincipal appPrincipal = new AppPrincipal(identifierUuid);
-
-        return new JwtAuthenticationToken(jwt, authorities, identifierUuid.toString()) {
-            @Override
-            public Object getPrincipal() {
-                return appPrincipal;
-            }
-        };
+        return new JwtAuthenticationToken(jwt, authorities);
     }
 }

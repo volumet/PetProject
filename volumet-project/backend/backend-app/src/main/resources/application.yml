@@ -16,7 +16,8 @@ spring:
       password: ${REDIS_PASSWORD}
 
   cache:
-    type: redis
+    redis:
+      value-serializer: org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 
   # flyway default configuration
   flyway:

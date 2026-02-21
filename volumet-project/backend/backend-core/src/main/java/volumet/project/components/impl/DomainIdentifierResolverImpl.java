@@ -2,21 +2,46 @@ package volumet.project.components.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import volumet.project.components.DomainIdentifierResolver;
 import volumet.project.dto.ExternalIdentifierDto;
 import volumet.project.repositories.query.PersonRepository;
+import volumet.project.services.UserService;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 public class DomainIdentifierResolverImpl implements DomainIdentifierResolver {
     private final PersonRepository personRepository;
+    private final UserService userService;
 
     @Override
-    @Cacheable(cacheNames = "personUuid")
-    public UUID resolveIdentifierUuid(ExternalIdentifierDto externalIdentifier) {
-        return personRepository.findPersonUuidByExternalIdentifier(externalIdentifier.getIssuer(), externalIdentifier.getSubject());
+    @Transactional
+    @Cacheable(
+            cacheNames = "personUuid",
+            key = "#externalIdentifierDto.issuer + ':' + #externalIdentifierDto.subject",
+            unless = "#result == null")
+    public String resolveIdentifierUuid(ExternalIdentifierDto externalIdentifierDto) {
+        return personRepository.findPersonUuidByExternalIdentifier(externalIdentifierDto.getIssuer(), externalIdentifierDto.getSubject())
+                .map(UUID::toString)
+                .orElseGet(() -> resolveSafely(externalIdentifierDto));
+    }
+
+    private String resolveSafely(ExternalIdentifierDto externalIdentifierDto) {
+        try {
+            userService.createUser(externalIdentifierDto);
+            Optional<UUID> uuid = personRepository.findPersonUuidByExternalIdentifier(externalIdentifierDto.getIssuer(), externalIdentifierDto.getSubject());
+            return uuid.map(UUID::toString).orElseThrow(() -> new IllegalStateException("Failed to resolve UUID after creation"));
+        }
+        catch (DataIntegrityViolationException _) {
+            // User created by another request
+            return personRepository.findPersonUuidByExternalIdentifier(externalIdentifierDto.getIssuer(), externalIdentifierDto.getSubject())
+                    .map(UUID::toString)
+                    .orElseThrow(() -> new IllegalStateException("Race condition after resolving identifier"));
+        }
     }
 }

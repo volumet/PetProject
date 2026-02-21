@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.convert.converter.Converter;
@@ -16,12 +17,14 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import volumet.project.annotations.DevProfile;
 import volumet.project.annotations.ProdProfile;
 import volumet.project.annotations.SecurityAutoConfiguration;
+import volumet.project.components.PostSecurityFilter;
 import volumet.project.utils.PermissionUtils;
 
 import java.io.IOException;
@@ -49,12 +52,15 @@ public class SecurityConfig {
     public SecurityFilterChain securedFilterChain(HttpSecurity http,
                                                   Converter<Jwt, AbstractAuthenticationToken> converter,
                                                   AuthenticationEntryPoint authEntryPoint,
-                                                  AccessDeniedHandler accessDeniedHandler) throws Exception {
+                                                  AccessDeniedHandler accessDeniedHandler,
+                                                  ObjectProvider<PostSecurityFilter> postSecurityFilters
+    ) throws Exception {
         initCommonSecurityChain(http, converter, authEntryPoint, accessDeniedHandler);
         http.authorizeHttpRequests(auth -> auth.anyRequest().authenticated());
-
+        postSecurityFilter(http, postSecurityFilters);
         return http.build();
     }
+
 
     /**
      * Disable csrf check for dev mode. <br/>
@@ -66,7 +72,9 @@ public class SecurityConfig {
     public SecurityFilterChain limitedSecurityFilterChain(HttpSecurity http,
                                                           Converter<Jwt, AbstractAuthenticationToken> converter,
                                                           AuthenticationEntryPoint authEntryPoint,
-                                                          AccessDeniedHandler accessDeniedHandler) throws Exception {
+                                                          AccessDeniedHandler accessDeniedHandler,
+                                                          ObjectProvider<PostSecurityFilter> postSecurityFilters
+    ) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
 
         initCommonSecurityChain(http, converter, authEntryPoint, accessDeniedHandler);
@@ -75,12 +83,21 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/api-docs",
                         "/api-docs/**",
-                        "/swagger-ui.html",
+                        "/swagger",
+                        "/swagger/**",
+                        "/swagger-ui",
                         "/swagger-ui/**"
                 ).permitAll()
                 .anyRequest().authenticated());
 
+        postSecurityFilter(http, postSecurityFilters);
+
         return http.build();
+    }
+
+    private static void postSecurityFilter(HttpSecurity http, ObjectProvider<PostSecurityFilter> postSecurityFilters) {
+        postSecurityFilters.orderedStream()
+                .forEach(filter -> http.addFilterAfter(filter, BearerTokenAuthenticationFilter.class));
     }
 
     private void initCommonSecurityChain(HttpSecurity http,

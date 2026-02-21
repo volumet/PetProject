@@ -3,7 +3,9 @@ package volumet.project.services.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import volumet.project.domains.ExternalIdentifier;
 import volumet.project.domains.Person;
+import volumet.project.dto.ExternalIdentifierDto;
 import volumet.project.dtos.request.PersonCreationRequestDto;
 import volumet.project.mappers.PersonMapper;
 import volumet.project.repositories.jpa.PersonJpaRepository;
@@ -20,6 +22,23 @@ public class UserServiceImpl implements UserService {
     public void createUser(PersonCreationRequestDto personCreationRequestDto) {
         Person person = personMapper.toEntity(personCreationRequestDto);
 
-        personJpaRepository.save(person);
+        // UUID is database generated so we must flush
+        personJpaRepository.saveAndFlush(person);
+    }
+
+    @Override
+    public void createUser(ExternalIdentifierDto externalIdentifierDto) {
+        Person person = new Person();
+        person.setFirstName(externalIdentifierDto.getFirstName());
+        person.setLastName(externalIdentifierDto.getLastName());
+
+        ExternalIdentifier externalIdentifier = new ExternalIdentifier();
+        externalIdentifier.setIssuer(externalIdentifierDto.getIssuer());
+        externalIdentifier.setSubject(externalIdentifierDto.getSubject());
+
+        person.addIdentifier(externalIdentifier);
+
+        // UUID is database generated so we must flush
+        personJpaRepository.saveAndFlush(person);
     }
 }
