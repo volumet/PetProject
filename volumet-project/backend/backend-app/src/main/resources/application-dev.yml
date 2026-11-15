@@ -32,4 +32,10 @@ springdoc:
 
 app:
   correlation:
-    enabled: true
+    enabled: false
+
+# ---- tracing: sample every request locally; the default is 10% ----
+management:
+  tracing:
+    sampling:
+      probability: 1.0

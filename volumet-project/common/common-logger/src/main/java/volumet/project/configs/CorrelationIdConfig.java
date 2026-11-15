@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
-import volumet.project.correlations.CorrelationIdFilter;
+import volumet.project.filters.CorrelationIdFilter;
 
 @AutoConfiguration
 @ConditionalOnWebApplication

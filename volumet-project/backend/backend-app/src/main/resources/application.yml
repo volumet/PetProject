@@ -61,6 +61,11 @@ logging:
   level:
     root: INFO
 
+# ---- correlation: Micrometer Tracing supplies traceId; set true to re-enable CorrelationIdFilter ----
+app:
+  correlation:
+    enabled: false
+
 volumet:
   security:
     keycloak:
