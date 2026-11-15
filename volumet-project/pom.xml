@@ -29,6 +29,8 @@
         <lombokbinding.version>0.2.0</lombokbinding.version>
         <!-- QueryDSL: OpenFeign fork (io.github.openfeign.querydsl); the original com.querydsl line is unmaintained since 5.1.0 (2024) -->
         <openfeign-querydsl.version>7.7</openfeign-querydsl.version>
+        <!-- JUnit 5 class-level parallelism; override with -Djunit.parallel.enabled=false -->
+        <junit.parallel.enabled>true</junit.parallel.enabled>
     </properties>
 
     <dependencyManagement>
@@ -98,4 +100,25 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <properties>
+                            <!-- Test classes run concurrently; methods within a class stay on one thread. -->
+                            <configurationParameters>
+                                junit.jupiter.execution.parallel.enabled=${junit.parallel.enabled}
+                                junit.jupiter.execution.parallel.mode.default=same_thread
+                                junit.jupiter.execution.parallel.mode.classes.default=concurrent
+                            </configurationParameters>
+                        </properties>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>
