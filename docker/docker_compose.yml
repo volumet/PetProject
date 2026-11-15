@@ -9,7 +9,7 @@ services:
       - .env
     environment:
       ACCEPT_EULA: "Y"
-      SA_PASSWORD: "${DB_PASSWORD}"
+      MSSQL_SA_PASSWORD: "${DB_PASSWORD}"
     volumes:
       - sql_data:/var/opt/mssql
       - ./docker-entrypoint-initdb.d:/init
@@ -25,8 +25,8 @@ services:
     ports:
       - "${REDIS_WSL2_PORT}:${REDIS_PORT}"
     volumes:
-      - redis_data:/var/opt/redis
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
     command: redis-server /usr/local/etc/redis/redis.conf
     restart: unless-stopped
     networks:

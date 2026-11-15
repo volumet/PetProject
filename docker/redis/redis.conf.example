@@ -1,0 +1,6 @@
+# Copy to redis.conf (git-ignored) and set a real password.
+# Mounted by both compose files at /usr/local/etc/redis/redis.conf; data persists in the redis_data volume (/data).
+appendonly yes
+requirepass change-me
+maxmemory 256mb
+maxmemory-policy allkeys-lru
