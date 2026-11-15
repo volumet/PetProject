@@ -1,7 +1,9 @@
 package volumet.project.controller.v1;
 
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,8 +19,9 @@ import volumet.project.services.UserService;
 @RequestMapping(ApiPath.API_V1 + "/registration")
 @Validated
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserRegistrationRestController {
-    private final UserService userService;
+    UserService userService;
 
     @PostMapping("/registerUser")
     @ResponseStatus(HttpStatus.CREATED)

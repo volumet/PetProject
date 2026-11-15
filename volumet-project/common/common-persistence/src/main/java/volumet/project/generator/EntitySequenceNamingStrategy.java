@@ -16,7 +16,13 @@ import static volumet.project.constants.PersistentConstant.SEQUENCE_SUFFIX;
 
 /**
  * Hibernate SPI implementation loaded via
- * 'hibernate.id.db_structure_naming_strategy'.
+ * 'hibernate.id.db_structure_naming_strategy'. <br/>
+ * Entity naming must be identical to the table it represents. <br/>
+ * Example: entity for <b>PERSON</b> table must be <b>Person</b>. <br/>
+ * Sequence for PERSON will and must be translated as PERSON_SEQUENCE. <br/>
+ *
+ * It is preferred to use ImplicitDatabaseObjectNamingStrategy
+ * over SequenceStyleGenerator to avoid overriding properties value.
  */
 @SuppressWarnings("unused")
 public class EntitySequenceNamingStrategy implements ImplicitDatabaseObjectNamingStrategy {

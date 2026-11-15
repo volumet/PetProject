@@ -14,6 +14,9 @@ import static volumet.project.constants.PersistentConstant.HIBERNATE_ID_OPTIMIZE
 @EnableConfigurationProperties(DefaultIdGenerationProperties.class)
 public class CommonPersistenceConfiguration {
 
+    /**
+     * Default properties for hibernate optimizer.
+     */
     @Bean
     public HibernatePropertiesCustomizer hibernatePropertiesCustomizer(DefaultIdGenerationProperties properties) {
         return hibernateProperties -> {

@@ -1,7 +1,9 @@
 package volumet.project.controller.v1;
 
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,8 +28,9 @@ import static volumet.project.constants.ApiPath.MANAGER_MAPPING;
 @RequestMapping(ApiPath.API_V1 + MANAGER_MAPPING)
 @Validated
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ManagerRestController {
-    private final RoomService roomService;
+    RoomService roomService;
 
     @PostMapping(MANAGER_CREATE_ROOM)
     @ResponseStatus(HttpStatus.CREATED)

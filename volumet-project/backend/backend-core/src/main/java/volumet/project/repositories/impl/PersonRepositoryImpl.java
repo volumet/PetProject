@@ -1,7 +1,9 @@
 package volumet.project.repositories.impl;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Repository;
 import volumet.project.domains.QExternalIdentifier;
 import volumet.project.domains.QPerson;
@@ -12,8 +14,9 @@ import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PersonRepositoryImpl implements PersonRepository {
-    private final JPAQueryFactory queryFactory;
+    JPAQueryFactory queryFactory;
 
     @Override
     public Optional<UUID> findPersonUuidByExternalIdentifier(String issuer, String subject) {
