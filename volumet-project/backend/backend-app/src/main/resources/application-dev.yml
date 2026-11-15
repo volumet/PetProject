@@ -1,10 +1,5 @@
 spring:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:${KEYCLOAK_PORT}/realms/volumet-realm
-          audiences: volumet-app
+  # issuer-uri / audiences: see application.yml
   jpa:
     show-sql: true
     properties:
@@ -36,7 +31,5 @@ springdoc:
     path: /api-docs
 
 app:
-  security:
-    enabled: true
   correlation:
     enabled: true

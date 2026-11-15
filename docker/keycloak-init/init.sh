@@ -4,6 +4,13 @@ set -euo pipefail
 
 KCADM=/opt/keycloak/bin/kcadm.sh
 
+# Must match the backend's JWT validation (application.yml, spring.security.oauth2.resourceserver.jwt):
+#   iss = $KEYCLOAK_PUBLIC_URL/realms/$REALM   (issuer-uri)
+#   aud contains $APP_CLIENT                   (audiences)
+REALM="${KEYCLOAK_REALM:-volumet-realm}"
+APP_CLIENT="${KEYCLOAK_CLIENT_ID:-volumet-app}"
+AUDIENCE_MAPPER="${APP_CLIENT}-audience"
+
 # Check for readiness
 echo "Waiting for Keycloak to be ready..."
 until $KCADM config credentials \
@@ -24,17 +31,16 @@ $KCADM config credentials \
   --password "$KC_BOOTSTRAP_ADMIN_PASSWORD"
 
 # Create realm
-if $KCADM get realms/volumet-realm > /dev/null 2>&1; then
+if $KCADM get "realms/$REALM" > /dev/null 2>&1; then
   echo "Realm existed!"
 else
   echo "Creating realm..."
   $KCADM create realms \
-    -s realm=volumet-realm \
+    -s realm="$REALM" \
     -s enabled=true
 fi
 
 # Create roles
-REALM=volumet-realm
 $KCADM get roles -r $REALM | grep -q '"name"[[:space:]]*:[[:space:]]*"ADMIN"' || \
 $KCADM create roles -r $REALM -s name=ADMIN
 
@@ -53,12 +59,12 @@ else
 fi
 
 # Create client
-CLIENT_ID=$($KCADM get clients -r volumet-realm -q clientId=volumet-app --fields id --format csv | tail -n 1 | tr -d '"')
+CLIENT_ID=$($KCADM get clients -r "$REALM" -q clientId="$APP_CLIENT" --fields id --format csv | tail -n 1 | tr -d '"')
 if [ -z "$CLIENT_ID" ]; then
-  echo "Creating client..."
-  CLIENT_ID=$(/opt/keycloak/bin/kcadm.sh create clients \
-      -r volumet-realm \
-      -s clientId=volumet-app \
+  echo "Creating client '$APP_CLIENT'..."
+  CLIENT_ID=$($KCADM create clients \
+      -r "$REALM" \
+      -s clientId="$APP_CLIENT" \
       -s enabled=true \
       -s publicClient=false \
       -s directAccessGrantsEnabled="$DIRECT_ACCESS_ENABLED" \
@@ -68,18 +74,19 @@ else
   echo "Client existed!"
 fi
 
-# Register backend as audience
+# Register backend as audience: access tokens issued to this client carry aud=$APP_CLIENT,
+# which the backend requires (spring.security.oauth2.resourceserver.jwt.audiences)
 MAPPER_EXISTS=$($KCADM get clients/"$CLIENT_ID"/protocol-mappers/models \
-  -r volumet-realm | grep -c volumet-app-audience || true)
+  -r "$REALM" | grep -c "\"$AUDIENCE_MAPPER\"" || true)
 
 if [ "$MAPPER_EXISTS" -eq 0 ]; then
-  echo "Creating audience mapper..."
+  echo "Creating audience mapper '$AUDIENCE_MAPPER'..."
   $KCADM create clients/"$CLIENT_ID"/protocol-mappers/models \
-    -r volumet-realm \
-    -s name=volumet-app-audience \
+    -r "$REALM" \
+    -s name="$AUDIENCE_MAPPER" \
     -s protocol=openid-connect \
     -s protocolMapper=oidc-audience-mapper \
-    -s 'config."included.client.audience"=volumet-app' \
+    -s "config.\"included.client.audience\"=$APP_CLIENT" \
     -s 'config."id.token.claim"=false' \
     -s 'config."access.token.claim"=true'
 else
@@ -121,3 +128,10 @@ else
       --uusername "$ADMIN_USERNAME" \
       --rolename ADMIN
 fi
+
+# The backend must be configured with exactly these values, or every request is rejected with 401
+echo "----------------------------------------------------------------"
+echo "Backend JWT validation must use:"
+echo "  issuer-uri : ${KEYCLOAK_PUBLIC_URL:-<KEYCLOAK_PUBLIC_URL not set>}/realms/$REALM   (token 'iss')"
+echo "  audiences  : $APP_CLIENT   (token 'aud')"
+echo "----------------------------------------------------------------"

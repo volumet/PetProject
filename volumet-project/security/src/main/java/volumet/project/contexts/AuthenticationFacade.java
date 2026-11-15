@@ -8,8 +8,10 @@ import volumet.project.dtos.AppPrincipal;
 
 import java.util.Optional;
 
+/**
+ * This class support security related operations.
+ */
 public class AuthenticationFacade {
-
     public Optional<JwtAuthenticationToken> getJwtAuthentication() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -20,6 +22,9 @@ public class AuthenticationFacade {
         return Optional.empty();
     }
 
+    /**
+     * Add principal to the current jwtAuthenticationToken.
+     */
     public void enrichJwtAuthentication(AppPrincipal appPrincipal) {
         Optional<JwtAuthenticationToken> jwtAuthHolder = getJwtAuthentication();
         if (jwtAuthHolder.isPresent()) {

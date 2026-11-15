@@ -64,7 +64,8 @@ services:
       KC_HTTP_ENABLED: true
       KC_BOOTSTRAP_ADMIN_USERNAME: "${KEYCLOAK_ADMIN_USER}"
       KC_BOOTSTRAP_ADMIN_PASSWORD: "${KEYCLOAK_ADMIN_PASSWORD}"
-      KC_HOSTNAME: "${KEYCLOAK_EXTERNAL_BASE_URL}"
+      # full URL pins the token issuer: iss = <this>/realms/<realm>, whichever URL the token was requested on
+      KC_HOSTNAME: "http://${KEYCLOAK_EXTERNAL_BASE_URL}:${KEYCLOAK_WSL2_PORT}"
       KC_DB: postgres
       KC_DB_URL_HOST: postgresql
       KC_DB_URL_PORT: 5432
@@ -84,6 +85,10 @@ services:
     environment:
       KEYCLOAK_BASE_URL: "${KEYCLOAK_WSL2_BASE_URL}:8080" # This should target keycloak server itself
       CLIENT_SECRET: "${KEYCLOAK_CLIENT_SECRET}"
+      # same values the backend validates against (iss / aud)
+      KEYCLOAK_REALM: "${KEYCLOAK_REALM:-volumet-realm}"
+      KEYCLOAK_CLIENT_ID: "${KEYCLOAK_CLIENT_ID:-volumet-app}"
+      KEYCLOAK_PUBLIC_URL: "http://${KEYCLOAK_EXTERNAL_BASE_URL}:${KEYCLOAK_WSL2_PORT}"
       KC_BOOTSTRAP_ADMIN_USERNAME: "${KEYCLOAK_ADMIN_USER}"
       KC_BOOTSTRAP_ADMIN_PASSWORD: "${KEYCLOAK_ADMIN_PASSWORD}"
       DIRECT_ACCESS_ENABLED: "false"

@@ -51,6 +51,22 @@
             <artifactId>spring-data-commons</artifactId>
         </dependency>
 
+        <!--
+            JPA auditing (JpaAuditableConfig): audit as the current user's AppPrincipal when the app has
+            Spring Security + common-security; otherwise as SYSTEM. Optional, so persistence doesn't force security.
+        -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>volumet.project</groupId>
+            <artifactId>volumet-common-security</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- for AbstractEntity QClass generationn -->
         <dependency>
             <groupId>io.github.openfeign.querydsl</groupId>

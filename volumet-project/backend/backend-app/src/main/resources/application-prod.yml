@@ -5,11 +5,13 @@ spring:
     show-sql: false
   flyway:
     clean-disabled: true
+  # No default in prod: the app fails to start if KEYCLOAK_ISSUER_URI is missing.
+  # audiences comes from application.yml (KEYCLOAK_CLIENT_ID).
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://keycloak-server/realms/myrealm
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
 
 springdoc:
   swagger-ui:
@@ -18,7 +20,5 @@ springdoc:
     enabled: false
 
 app:
-  security:
-    enabled: true
   correlation:
     enabled: true
