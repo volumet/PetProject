@@ -1,22 +1,16 @@
 package volumet.project.configs;
 
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.cache.RedisCacheConfiguration;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
 
+/**
+ * Enables Spring Cache (@Cacheable, e.g. the personUuid cache). The shared default (JSON values,
+ * spring.cache.redis.*) comes from common-resilience's RedisCacheDefaultsConfig.
+ * <p>
+ * Caches read through CacheStampedeGuard (e.g. rooms) don't use Spring Cache: they live in the
+ * version-ordered RedisVersionedCache, with their TTL declared on their KeySpace (CacheKeySpaces).
+ */
 @Configuration
 @EnableCaching
 public class RedisCacheConfig {
-
-    @Bean
-    public RedisCacheConfiguration redisCacheConfiguration() {
-        return RedisCacheConfiguration
-                .defaultCacheConfig()
-                .serializeValuesWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer())
-                );
-    }
 }
