@@ -25,6 +25,12 @@
 			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
 
+		<!-- RabbitMQ message queue -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+
 		<!-- Health metrics -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

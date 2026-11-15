@@ -98,10 +98,31 @@ services:
     networks:
       volumetnet:
 
+  rabbitmq:
+    image: rabbitmq:${RABBITMQ_VERSION}
+    container_name: rabbitmq
+    ports:
+      - "${RABBITMQ_WSL2_PORT}:${RABBITMQ_PORT}"
+      - "${RABBITMQ_WSL2_MANAGEMENT_PORT}:${RABBITMQ_MANAGEMENT_PORT}"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    environment:
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
+    networks:
+      volumetnet:
+
 volumes:
   sql_data:
   redis_data:
   keycloak_db_data:
+  rabbitmq_data:
 
 networks:
   volumetnet:
