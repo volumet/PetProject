@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>volumet.project</groupId>
+		<artifactId>volumet-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>volumet-playground</artifactId>
+	<name>volumet-playground</name>
+	<description>
+		Practice module: hand-written implementations of the resilience / messaging topics, one package per topic,
+		each specified by its test suite. Deliberately independent of common-resilience. See README.md.
+	</description>
+
+	<properties>
+		<!--
+			Unfinished exercises fail their tests by design, so the normal build skips them.
+			Run them with: ./backend/mvnw -f pom.xml -pl playground test -Dplayground.skip=false
+			(running a test class from the IDE ignores this switch).
+		-->
+		<playground.skip>true</playground.skip>
+	</properties>
+
+	<dependencies>
+		<!-- MDC propagation in CoalescerTaskExecutor -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<!-- JSON: records round-trip (W1), Redis JSON values (W3) -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+
+		<!-- A real SLF4J backend for tests: without one, MDC is a no-op and propagation can't be observed -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Tests: JUnit 5 + AssertJ -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skip>${playground.skip}</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

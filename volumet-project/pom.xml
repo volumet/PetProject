@@ -15,6 +15,7 @@
         <module>common</module>
         <module>security</module>
         <module>backend</module>
+        <module>playground</module>
     </modules>
 
     <groupId>volumet.project</groupId>
