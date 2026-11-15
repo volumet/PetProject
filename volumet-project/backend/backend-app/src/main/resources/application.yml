@@ -15,8 +15,16 @@ spring:
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
 
-  cache:
-    type: redis
+  # Keycloak resource server: every JWT must have iss == issuer-uri and aud containing the client id.
+  # Same variables as docker/keycloak-init (KEYCLOAK_REALM, KEYCLOAK_CLIENT_ID); defaults match docker/.env.
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:${KEYCLOAK_PORT:8088}/realms/${KEYCLOAK_REALM:volumet-realm}}
+          audiences: ${KEYCLOAK_CLIENT_ID:volumet-app}
+
+  # Redis cache values are JSON (common-resilience RedisCacheDefaultsConfig); spring.cache.redis.* still applies
 
   # flyway default configuration
   flyway:
@@ -50,3 +58,65 @@ server:
 logging:
   level:
     root: INFO
+
+# ---- correlation: Micrometer Tracing supplies traceId; set true to re-enable CorrelationIdFilter ----
+app:
+  correlation:
+    enabled: false
+
+# ---- actuator: circuit breaker state in /actuator/health ----
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, circuitbreakers, bulkheads, retries
+  health:
+    circuitbreakers:
+      enabled: true
+
+# ---- resilience4j: room reads (RoomRepositoryImpl#findVersionedById) ----
+# Shared defaults (backoff, jitter, thresholds, open-state wait, ...) come from common-resilience
+# (volumet/resilience4j-defaults.yml); only what differs for room reads is set here. Every value must stay within
+# volumet.resilience.limits.* or the app refuses to start.
+resilience4j:
+  retry:
+    instances:
+      roomRead:
+        # cheap read on a hot path: 1 retry is enough, fail fast otherwise
+        max-attempts: 2
+        # only transient DB failures (circuit-open / bulkhead-full are excluded by the shared default)
+        retry-exceptions:
+          - org.springframework.dao.TransientDataAccessException
+          - org.springframework.dao.RecoverableDataAccessException
+          - org.springframework.transaction.CannotCreateTransactionException
+          - java.sql.SQLTransientException
+  circuitbreaker:
+    instances:
+      roomRead:
+        base-config: default
+  bulkhead:
+    instances:
+      roomRead:
+        # keep below the Hikari pool size (default 10) so other queries still get connections
+        max-concurrent-calls: 8
+
+volumet:
+  executor:
+    request-coalescer:
+      concurrency-limit: 200
+      await-termination: 30s
+      thread-name-prefix: request-coalescer-
+      # > lock wait-time + bulkhead wait + slowest load (with retry)
+      default-timeout: 10s
+  lock:
+    registry-key: volumet-lock
+    # lease: must outlive the slowest load
+    expire-after: 30s
+    wait-time: 3s
+  security:
+    keycloak:
+      # this service's client: its client roles (resource_access.<client>.roles) count as ROLE_ authorities too
+      client-id: ${KEYCLOAK_CLIENT_ID:volumet-app}
+    cors:
+      # browser frontends on other origins, comma-separated (e.g. https://app.example.com); empty = CORS off
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:}

@@ -1,14 +1,5 @@
 package volumet.project.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.util.UUID;
-
-@Getter
-@Setter
-@AllArgsConstructor
-public class AppPrincipal {
-    private UUID uuid;
+/** The app's own user identity (uuid), set as the authentication principal by UserIdentifierFilter. */
+public record AppPrincipal(String uuid) {
 }

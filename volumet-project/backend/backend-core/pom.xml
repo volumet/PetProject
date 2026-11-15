@@ -35,6 +35,12 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
 		<!-- Standard JPA dependencies for business layer -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -58,16 +64,27 @@
 			APT: for Query Projection
 		-->
 		<dependency>
-			<groupId>com.querydsl</groupId>
+			<groupId>io.github.openfeign.querydsl</groupId>
 			<artifactId>querydsl-jpa</artifactId>
-			<classifier>jakarta</classifier>
 		</dependency>
 
 		<dependency>
-			<groupId>com.querydsl</groupId>
+			<groupId>io.github.openfeign.querydsl</groupId>
 			<artifactId>querydsl-apt</artifactId>
 			<classifier>jakarta</classifier>
 			<scope>provided</scope>
+		</dependency>
+
+		<!-- Shared resilience stack: resilience4j, request coalescer, distributed lock, stampede guard -->
+		<dependency>
+			<groupId>volumet.project</groupId>
+			<artifactId>volumet-common-resilience</artifactId>
+		</dependency>
+
+		<!-- Opt in to common-resilience's Redis distributed lock + cache stampede guard -->
+		<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-redis</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -103,10 +120,17 @@
 						</path>
 
 						<path>
-							<groupId>com.querydsl</groupId>
+							<groupId>io.github.openfeign.querydsl</groupId>
 							<artifactId>querydsl-apt</artifactId>
 							<classifier>jakarta</classifier>
-							<version>${querydsl.version}</version>
+							<version>${openfeign-querydsl.version}</version>
+						</path>
+
+						<!-- needed by the OpenFeign querydsl-apt processor -->
+						<path>
+							<groupId>jakarta.inject</groupId>
+							<artifactId>jakarta.inject-api</artifactId>
+							<version>${jakarta-inject.version}</version>
 						</path>
 
 						<path>

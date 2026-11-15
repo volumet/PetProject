@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>volumet.project</groupId>
+		<artifactId>volumet-common</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>volumet-common-resilience</artifactId>
+	<name>volumet-common-resilience</name>
+	<description>
+		Shared resilience stack for every service: resilience4j, request coalescer (virtual threads),
+		Redis distributed lock and cache stampede guard. Auto-configured: add the dependency, then tune
+		volumet.executor.request-coalescer.*, volumet.lock.* and resilience4j.* in the app.
+	</description>
+
+	<dependencies>
+		<!-- Shared constants (StringConstants); a small module with only spring-context -->
+		<dependency>
+			<groupId>volumet.project</groupId>
+			<artifactId>volumet-common-utils</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-autoconfigure</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<!-- @Validated configuration properties -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+
+		<!-- resilience4j annotations (@CircuitBreaker, @Retry, @Bulkhead, ...) need AOP -->
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-spring-boot3</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
+
+		<!--
+			Redis distributed lock + cache stampede guard. Optional: an app opts in by adding
+			spring-integration-redis itself (and Redis), so apps without Redis don't get it auto-configured.
+		-->
+		<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-redis</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- Tests -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- A real SLF4J backend: without one MDC is a no-op and the correlation-id propagation test can't observe it -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Real Redis for RedisVersionedCacheTest (Lua compare-and-set); the test is skipped without Docker -->
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.lettuce</groupId>
+			<artifactId>lettuce-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- JSON cache values (GenericJackson2JsonRedisSerializer); apps get Jackson from spring-boot-starter-web -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

@@ -11,4 +11,7 @@ public final class PersistentConstant {
     public static final String HIBERNATE_ID_DB_STRUCTURE_NAMING_STRATEGY = "hibernate.id.db_structure_naming_strategy";
     public static final String HIBERNATE_ID_OPTIMIZER_POOLED_PREFERRED = "hibernate.id.optimizer.pooled.preferred";
     public static final String HIBERNATE_ID_OPTIMIZER_INCREMENT_SIZE = "hibernate.id.optimizer.increment_size";
+
+    /** Auditor written to createdBy / lastModifiedBy when no user is authenticated. */
+    public static final String SYSTEM_AUDITOR = "SYSTEM";
 }

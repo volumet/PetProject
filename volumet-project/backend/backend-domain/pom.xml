@@ -22,10 +22,17 @@
 
 		<!-- QClass generation -->
 		<dependency>
-			<groupId>com.querydsl</groupId>
+			<groupId>io.github.openfeign.querydsl</groupId>
 			<artifactId>querydsl-apt</artifactId>
 			<classifier>jakarta</classifier>
 			<scope>provided</scope>
+		</dependency>
+
+		<!-- needed by the OpenFeign querydsl-apt processor at compile time (Hibernate only brings it at runtime scope) -->
+		<dependency>
+		    <groupId>jakarta.inject</groupId>
+		    <artifactId>jakarta.inject-api</artifactId>
+		    <scope>provided</scope>
 		</dependency>
 
         <dependency>
@@ -33,4 +40,27 @@
             <artifactId>volumet-common-utils</artifactId>
         </dependency>
     </dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.hibernate.orm.tooling</groupId>
+				<artifactId>hibernate-enhance-maven-plugin</artifactId>
+				<version>${hibernate.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>enhance</goal>
+						</goals>
+						<configuration>
+							<enableLazyInitialization>true</enableLazyInitialization>
+							<enableDirtyTracking>true</enableDirtyTracking>
+							<enableAssociationManagement>true</enableAssociationManagement>
+							<enableExtendedEnhancement>false</enableExtendedEnhancement>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

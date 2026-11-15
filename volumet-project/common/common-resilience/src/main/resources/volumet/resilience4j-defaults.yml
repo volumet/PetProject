@@ -1,0 +1,57 @@
+# Shared resilience4j defaults for every service using common-resilience.
+# Loaded as the LOWEST-precedence property source (ResilienceDefaultsEnvironmentPostProcessor): any key an app sets
+# in its application.yml wins. Instances without base-config inherit "default" automatically.
+# All values stay within volumet.resilience.limits (checked at startup by ResilienceLimitsValidator).
+#
+# Exceptions listed here are resilience4j's own (always on the classpath). App-specific ones (what is transient,
+# what is a business error) go into the app's instance config, e.g. retry-exceptions for DB timeouts.
+resilience4j:
+  retry:
+    configs:
+      default:
+        # 1 call + 2 retries; waits ~200ms then ~400ms, +-50% jitter so pods don't retry in lockstep (worst ~0.9s)
+        max-attempts: 3
+        wait-duration: 200ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        exponential-max-wait-duration: 1s
+        enable-randomized-wait: true
+        randomized-wait-factor: 0.5
+        # never retry a call that was rejected to protect the dependency: retrying it defeats the protection
+        ignore-exceptions:
+          - io.github.resilience4j.circuitbreaker.CallNotPermittedException
+          - io.github.resilience4j.bulkhead.BulkheadFullException
+          - io.github.resilience4j.ratelimiter.RequestNotPermitted
+  circuitbreaker:
+    configs:
+      default:
+        register-health-indicator: true
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 50
+        minimum-number-of-calls: 20
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 80
+        slow-call-duration-threshold: 2s
+        wait-duration-in-open-state: 20s
+        permitted-number-of-calls-in-half-open-state: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+        # a full bulkhead means "busy", not "dependency broken"
+        ignore-exceptions:
+          - io.github.resilience4j.bulkhead.BulkheadFullException
+  bulkhead:
+    configs:
+      default:
+        max-concurrent-calls: 10
+        max-wait-duration: 500ms
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 5s
+        cancel-running-future: true
+  ratelimiter:
+    configs:
+      default:
+        register-health-indicator: true
+        limit-for-period: 100
+        limit-refresh-period: 1s
+        timeout-duration: 0s

@@ -1,1 +1,2 @@
 volumet.project.configs.CommonPersistenceConfiguration
+volumet.project.configs.JpaAuditableConfig

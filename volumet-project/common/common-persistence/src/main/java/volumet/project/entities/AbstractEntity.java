@@ -12,6 +12,9 @@ import lombok.Getter;
 import lombok.Setter;
 import volumet.project.enums.EntityStatus;
 
+/**
+ * Abstract entity with default sequence id generation.
+ */
 @MappedSuperclass
 @Getter
 @Setter

@@ -1,9 +1,12 @@
 package volumet.project.controller.v1;
 
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,8 +28,9 @@ import static volumet.project.constants.ApiPath.MANAGER_MAPPING;
 @RequestMapping(ApiPath.API_V1 + MANAGER_MAPPING)
 @Validated
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ManagerRestController {
-    private final RoomService roomService;
+    RoomService roomService;
 
     @PostMapping(MANAGER_CREATE_ROOM)
     @ResponseStatus(HttpStatus.CREATED)
@@ -37,5 +41,11 @@ public class ManagerRestController {
     @GetMapping("/getRoom/{id}")
     public ResponseEntity<RoomResponseDto> getRoom(@PathVariable Long id) {
         return ResponseEntity.ofNullable(roomService.findById(id));
+    }
+
+    @GetMapping("/test")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("success");
     }
 }

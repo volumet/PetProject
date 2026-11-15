@@ -10,6 +10,6 @@ import static volumet.project.utils.CorrelationUtils.getCorrelationId;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PermissionUtils {
     public static ErrorResponseDto buildErrorResponse(String message, HttpStatus status) {
-        return new ErrorResponseDto(message, status.getReasonPhrase(), getCorrelationId());
+        return new ErrorResponseDto(status.name(), message, getCorrelationId());
     }
 }
