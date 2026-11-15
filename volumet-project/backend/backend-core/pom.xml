@@ -58,13 +58,12 @@
 			APT: for Query Projection
 		-->
 		<dependency>
-			<groupId>com.querydsl</groupId>
+			<groupId>io.github.openfeign.querydsl</groupId>
 			<artifactId>querydsl-jpa</artifactId>
-			<classifier>jakarta</classifier>
 		</dependency>
 
 		<dependency>
-			<groupId>com.querydsl</groupId>
+			<groupId>io.github.openfeign.querydsl</groupId>
 			<artifactId>querydsl-apt</artifactId>
 			<classifier>jakarta</classifier>
 			<scope>provided</scope>
@@ -103,10 +102,17 @@
 						</path>
 
 						<path>
-							<groupId>com.querydsl</groupId>
+							<groupId>io.github.openfeign.querydsl</groupId>
 							<artifactId>querydsl-apt</artifactId>
 							<classifier>jakarta</classifier>
-							<version>${querydsl.version}</version>
+							<version>${openfeign-querydsl.version}</version>
+						</path>
+
+						<!-- needed by the OpenFeign querydsl-apt processor -->
+						<path>
+							<groupId>jakarta.inject</groupId>
+							<artifactId>jakarta.inject-api</artifactId>
+							<version>${jakarta-inject.version}</version>
 						</path>
 
 						<path>

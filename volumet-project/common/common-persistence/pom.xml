@@ -53,9 +53,16 @@
 
         <!-- for AbstractEntity QClass generationn -->
         <dependency>
-            <groupId>com.querydsl</groupId>
+            <groupId>io.github.openfeign.querydsl</groupId>
             <artifactId>querydsl-apt</artifactId>
             <classifier>jakarta</classifier>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- needed by the OpenFeign querydsl-apt processor at compile time (Hibernate only brings it at runtime scope) -->
+        <dependency>
+            <groupId>jakarta.inject</groupId>
+            <artifactId>jakarta.inject-api</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
